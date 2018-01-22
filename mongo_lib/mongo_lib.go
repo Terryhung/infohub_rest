@@ -53,7 +53,7 @@ func GetNews(country string, language string, category string) []News {
 		fmt.Printf("Error for Connection: %s\n", err)
 	}
 
-	defer session.Clone()
+	defer session.Close()
 
 	var results []News
 
