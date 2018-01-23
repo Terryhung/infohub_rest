@@ -45,16 +45,7 @@ func NowDate() string {
 	return date_time
 }
 
-func GetNews(country string, language string, category string) []News {
-	mongo_url, err := MongoAccount("normal")
-	session, err := mgo.Dial(mongo_url)
-
-	if err != nil {
-		fmt.Printf("Error for Connection: %s\n", err)
-	}
-
-	defer session.Close()
-
+func GetNews(country string, language string, category string, session *mgo.Session) []News {
 	var results []News
 
 	col := session.DB("droi").C("cache")
