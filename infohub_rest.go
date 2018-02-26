@@ -32,6 +32,7 @@ type Account struct {
 func main() {
 	api := rest.NewApi()
 	api.Use(rest.DefaultCommonStack...)
+	api.Use(&rest.GzipMiddleware{})
 	router, err := rest.MakeRouter(
 		rest.Get("/get_news", GetNews),
 	)
@@ -65,7 +66,7 @@ func GetNews(w rest.ResponseWriter, r *rest.Request) {
 	needed_fields := []string{"country", "language", "category"}
 	status, params := CheckParameters(r, needed_fields)
 
-	random_index := rand.Intn(10)
+	random_index := rand.Intn(20)
 
 	if !status {
 		var r_json map[string]string
@@ -84,13 +85,12 @@ func GetNews(w rest.ResponseWriter, r *rest.Request) {
 func createConnections(num int) [20]*mgo.Session {
 	var sessions [20]*mgo.Session
 	for i := 0; i < num; i++ {
-		mongo_url, err := MongoAccount("normal")
+		mongo_url, err := MongoAccount("i7")
 		session, err := mgo.Dial(mongo_url)
 
 		if err != nil {
 			fmt.Printf("Error for Connection: %s\n", err)
 		}
-		fmt.Printf("Session %+v\n", session)
 		sessions[i] = session
 	}
 

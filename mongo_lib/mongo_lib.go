@@ -1,17 +1,12 @@
 package mongo_lib
 
 import (
-	"errors"
-	"fmt"
 	"math"
+	"math/rand"
 	"time"
-
-	"io/ioutil"
-	"path/filepath"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"gopkg.in/yaml.v2"
 )
 
 type User struct {
@@ -27,7 +22,12 @@ type Account struct {
 }
 
 type News struct {
-	Title string
+	Title          string `json:"title"`
+	Source_name    string `json:"source_name"`
+	Image_url      string `json:"image_url"`
+	Like_numbers   int    `json:"link_numbers"`
+	Unlike_numbers int    `json:"unlink_numbers"`
+	Description    string `json:"description"`
 }
 
 func NowTSNorm() int32 {
@@ -45,30 +45,22 @@ func NowDate() string {
 	return date_time
 }
 
-func GetNews(country string, language string, category string, session *mgo.Session) []News {
-	var results []News
-
-	col := session.DB("droi").C("cache")
-	constr := bson.M{"source_date_int": bson.M{"$gte": NowTSNorm() - 86400}, "category": category, "language": language, "country": country}
-	_ = col.Find(constr).Limit(10).All(&results)
-
+func RandomChoice(dataset []News) []News {
+	results := []News{}
+	for i := 0; i < 10; i++ {
+		random_index := rand.Intn(len(dataset))
+		results = append(results, dataset[random_index])
+	}
 	return results
 }
 
-func MongoAccount(_type string) (string, error) {
-	var account Account
-	filename, _ := filepath.Abs("mongo_lib/key.yaml")
-	yamlFile, err := ioutil.ReadFile(filename)
-	err = yaml.Unmarshal(yamlFile, &account)
+func GetNews(country string, language string, category string, session *mgo.Session) []News {
+	var results []News
 
-	if err != nil {
-		fmt.Println(err)
-	}
+	col := session.DB("analysis").C("news_meta")
+	constr := bson.M{"source_date_int": bson.M{"$gte": NowTSNorm() - 86400}, "category": category, "language": language, "country": country}
+	_ = col.Find(constr).Limit(100).All(&results)
+	results = RandomChoice(results)
 
-	for _, v := range account.Mongo_users {
-		if v.Type == _type {
-			return fmt.Sprintf("mongodb://%s:%s@%s:%d", v.User, v.Password, v.Host, v.Port), nil
-		}
-	}
-	return "", errors.New("User not found!")
+	return results
 }

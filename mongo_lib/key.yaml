@@ -7,6 +7,13 @@ mongo_users:
   password: terry.hung
 
 -
+  type: i7
+  host: 10.128.111.10
+  port: 27017
+  user: terry.hung
+  password: terry.hung
+
+-
   type: root
   host: 10.10.80.236
   port: 27017
