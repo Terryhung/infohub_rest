@@ -22,12 +22,16 @@ type Account struct {
 }
 
 type News struct {
-	Title          string `json:"title"`
-	Source_name    string `json:"source_name"`
-	Image_url      string `json:"image_url"`
-	Like_numbers   int    `json:"link_numbers"`
-	Unlike_numbers int    `json:"unlink_numbers"`
-	Description    string `json:"description"`
+	Title             string   `json:"title"`
+	Source_name       string   `json:"source_name"`
+	Image_url         string   `json:"image_url"`
+	Like_numbers      int      `json:"link_numbers"`
+	Unlike_numbers    int      `json:"unlink_numbers"`
+	Description       string   `json:"description"`
+	Page_link         string   `json:"page_link"`
+	Explicit_keywords []string `json:"explicit_keywords"`
+	Source_date       string   `json:"source_date_int"`
+	Similar_ids       []string `json:"similar_ids"`
 }
 
 func NowTSNorm() int32 {
@@ -57,10 +61,11 @@ func RandomChoice(dataset []News) []News {
 func GetNews(country string, language string, category string, session *mgo.Session) []News {
 	var results []News
 
-	col := session.DB("analysis").C("news_meta")
+	col := session.DB("analysis").C("news_meta_baas")
 	constr := bson.M{"source_date_int": bson.M{"$gte": NowTSNorm() - 86400}, "category": category, "language": language, "country": country}
 	_ = col.Find(constr).Limit(100).All(&results)
-	results = RandomChoice(results)
-
+	if len(results) > 0 {
+		results = RandomChoice(results)
+	}
 	return results
 }

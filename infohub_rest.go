@@ -29,6 +29,16 @@ type Account struct {
 	Mongo_users []User
 }
 
+type Result struct {
+	Message string      `json:"message"`
+	Results interface{} `json:"results"`
+}
+
+type Respond struct {
+	Code   int
+	Result Result
+}
+
 func main() {
 	api := rest.NewApi()
 	api.Use(rest.DefaultCommonStack...)
@@ -77,7 +87,15 @@ func GetNews(w rest.ResponseWriter, r *rest.Request) {
 	} else {
 		fmt.Printf("Session %+v\n", sessions[random_index])
 		results := mongo_lib.GetNews(params["country"], params["language"], params["category"], sessions[random_index])
-		w.WriteJson(&results)
+		var result = Result{"No News", nil}
+
+		if len(results) > 0 {
+			result = Result{"OK", results}
+		}
+
+		var respond = Respond{0, result}
+
+		w.WriteJson(&respond)
 	}
 	lock.RUnlock()
 }
