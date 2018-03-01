@@ -31,7 +31,7 @@ type Account struct {
 
 type Result struct {
 	Message string      `json:"message"`
-	Results interface{} `json:"results"`
+	News_result interface{} `json:"news_results"`
 }
 
 type Respond struct {
