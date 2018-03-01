@@ -32,6 +32,7 @@ type News struct {
 	Explicit_keywords []string `json:"explicit_keywords"`
 	Source_date       string   `json:"source_date_int"`
 	Similar_ids       []string `json:"similar_ids"`
+	ClassName         string   `json:"_ClassName"`
 }
 
 func NowTSNorm() int32 {
@@ -53,6 +54,7 @@ func RandomChoice(dataset []News) []News {
 	results := []News{}
 	for i := 0; i < 10; i++ {
 		random_index := rand.Intn(len(dataset))
+		dataset[random_index].ClassName = "news"
 		results = append(results, dataset[random_index])
 	}
 	return results
