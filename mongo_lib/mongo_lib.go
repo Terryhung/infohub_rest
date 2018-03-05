@@ -3,6 +3,7 @@ package mongo_lib
 import (
 	"math"
 	"math/rand"
+	"strings"
 	"time"
 
 	"gopkg.in/mgo.v2"
@@ -24,7 +25,7 @@ type Account struct {
 type News struct {
 	Title             string   `json:"title"`
 	Source_name       string   `json:"source_name"`
-	Image_url_array         []string   `json:"image_url_array"`
+	Image_url_array   []string `json:"image_url_array"`
 	Image_url         string   `json:"image_url"`
 	Like_numbers      int      `json:"link_numbers"`
 	Unlike_numbers    int      `json:"unlink_numbers"`
@@ -64,9 +65,13 @@ func RandomChoice(dataset []News) []News {
 func GetNews(country string, language string, category string, session *mgo.Session) []News {
 	var results []News
 
+	if strings.Contains(category, "for") && strings.Contains(category, "you") {
+		category = "headline"
+	}
+
 	col := session.DB("analysis").C("news_meta_baas")
 	constr := bson.M{"source_date_int": bson.M{"$gte": NowTSNorm() - 86400}, "category": category, "language": language, "country": country}
-	_ = col.Find(constr).Limit(100).All(&results)
+	_ = col.Find(constr).Limit(200).All(&results)
 	if len(results) > 0 {
 		results = RandomChoice(results)
 	}
