@@ -72,6 +72,10 @@ func GetNews(country string, language string, category string, session *mgo.Sess
 	col := session.DB("analysis").C("news_meta_baas")
 	constr := bson.M{"source_date_int": bson.M{"$gte": NowTSNorm() - 86400}, "category": category, "language": language, "country": country}
 	_ = col.Find(constr).Limit(200).All(&results)
+	if len(results) == 0 {
+		constr := bson.M{"source_date_int": bson.M{"$gte": NowTSNorm() - 86400}, "category": category, "language": language, "country_array": "ALL"}
+		_ = col.Find(constr).Limit(200).All(&results)
+	}
 	if len(results) > 0 {
 		results = RandomChoice(results)
 	}
