@@ -52,9 +52,9 @@ func NowDate() string {
 	return date_time
 }
 
-func RandomChoice(dataset []News) []News {
+func RandomChoice(dataset []News, _size int) []News {
 	results := []News{}
-	for i := 0; i < 10; i++ {
+	for i := 0; i < _size; i++ {
 		random_index := rand.Intn(len(dataset))
 		dataset[random_index].ClassName = "news"
 		results = append(results, dataset[random_index])
@@ -62,11 +62,33 @@ func RandomChoice(dataset []News) []News {
 	return results
 }
 
-func GetNews(country string, language string, category string, session *mgo.Session) []News {
+func GetForyou(country string, language string, category string, session *mgo.Session, _size int) []News {
+	categories := []string{"pets", "girls", "food"}
+	results := []News{}
+	h_size := _size / 2
+
+	for len(results) < h_size {
+		random_index := rand.Intn(len(categories))
+		category := categories[random_index]
+		p_results := GetNews(country, language, category, session, 1)
+		if len(p_results) > 0 {
+			results = append(results, p_results[0])
+		}
+	}
+
+	headline_result := GetNews(country, language, "headline", session, _size-h_size)
+	for i := 0; i < len(headline_result); i++ {
+		results = append(results, headline_result[i])
+	}
+
+	return results
+}
+
+func GetNews(country string, language string, category string, session *mgo.Session, _size int) []News {
 	var results []News
 
 	if strings.Contains(category, "for") && strings.Contains(category, "you") {
-		category = "headline"
+		return GetForyou(country, language, category, session, _size)
 	}
 
 	col := session.DB("analysis").C("news_meta_baas")
@@ -76,8 +98,10 @@ func GetNews(country string, language string, category string, session *mgo.Sess
 		constr := bson.M{"source_date_int": bson.M{"$gte": NowTSNorm() - 86400*3}, "category": category, "language": language, "country_array": bson.M{"$in": []string{"ALL", country}}}
 		_ = col.Find(constr).Limit(200).Sort("-source_date_int").All(&results)
 	}
+
 	if len(results) > 0 {
-		results = RandomChoice(results)
+		results = RandomChoice(results, _size)
 	}
+
 	return results
 }

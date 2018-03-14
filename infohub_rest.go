@@ -30,7 +30,7 @@ type Account struct {
 }
 
 type Result struct {
-	Message string      `json:"message"`
+	Message     string      `json:"message"`
 	News_result interface{} `json:"news_results"`
 }
 
@@ -85,8 +85,7 @@ func GetNews(w rest.ResponseWriter, r *rest.Request) {
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.WriteJson(&r_json)
 	} else {
-		fmt.Printf("Session %+v\n", sessions[random_index])
-		results := mongo_lib.GetNews(params["country"], params["language"], params["category"], sessions[random_index])
+		results := mongo_lib.GetNews(params["country"], params["language"], params["category"], sessions[random_index], 10)
 		var result = Result{"No News", nil}
 
 		if len(results) > 0 {
