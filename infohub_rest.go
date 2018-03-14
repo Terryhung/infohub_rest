@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/Terryhung/infohub_rest/mongo_lib"
+	"github.com/Terryhung/infohub_rest/redis_lib"
 	"github.com/ant0ine/go-json-rest/rest"
 
 	"gopkg.in/mgo.v2"
@@ -75,6 +76,7 @@ func GetNews(w rest.ResponseWriter, r *rest.Request) {
 	lock.RLock()
 	needed_fields := []string{"country", "language", "category"}
 	status, params := CheckParameters(r, needed_fields)
+	redis_client, status := redis_lib.NewClient()
 
 	random_index := rand.Intn(20)
 
@@ -85,7 +87,7 @@ func GetNews(w rest.ResponseWriter, r *rest.Request) {
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.WriteJson(&r_json)
 	} else {
-		results := mongo_lib.GetNews(params["country"], params["language"], params["category"], sessions[random_index], 10)
+		results := mongo_lib.GetNews(params["country"], params["language"], params["category"], sessions[random_index], 10, redis_client, status)
 		var result = Result{"No News", nil}
 
 		if len(results) > 0 {
