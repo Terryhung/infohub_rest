@@ -1,6 +1,7 @@
 package mongo_lib
 
 import (
+	"crypto/sha1"
 	"math"
 	"math/rand"
 	"strings"
@@ -10,6 +11,9 @@ import (
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/go-redis/redis"
+
+	"crypto/md5"
+	"encoding/hex"
 
 	"github.com/Terryhung/infohub_rest/news"
 	"github.com/Terryhung/infohub_rest/redis_lib"
@@ -44,9 +48,16 @@ func NowDate() string {
 
 func RandomChoice(dataset []news.News, _size int) []news.News {
 	results := []news.News{}
+	h := sha1.New()
+	hasher := md5.New()
 	for i := 0; i < _size; i++ {
 		random_index := rand.Intn(len(dataset))
 		dataset[random_index].ClassName = "news"
+		hasher.Write([]byte(dataset[random_index].Link))
+		_id := hex.EncodeToString(hasher.Sum(nil))
+		h.Write([]byte(_id))
+		bs := hex.EncodeToString(h.Sum(nil))
+		dataset[random_index].Id = bs[:24]
 		results = append(results, dataset[random_index])
 	}
 	return results
