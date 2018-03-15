@@ -110,6 +110,8 @@ func createConnections(num int) [20]*mgo.Session {
 
 		if err != nil {
 			fmt.Printf("Error for Connection: %s\n", err)
+		} else {
+			fmt.Print("Connection Status: Good!\n")
 		}
 		sessions[i] = session
 	}
