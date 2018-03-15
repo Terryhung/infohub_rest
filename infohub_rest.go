@@ -72,11 +72,12 @@ func CheckParameters(r *rest.Request, needed_fields []string) (bool, map[string]
 
 var sessions = createConnections(20)
 
+var redis_client, r_status = redis_lib.NewClient()
+
 func GetNews(w rest.ResponseWriter, r *rest.Request) {
 	lock.RLock()
 	needed_fields := []string{"country", "language", "category"}
 	status, params := CheckParameters(r, needed_fields)
-	redis_client, r_status := redis_lib.NewClient()
 
 	random_index := rand.Intn(20)
 

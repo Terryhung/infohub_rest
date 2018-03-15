@@ -19,6 +19,7 @@ func NewClient() (*redis.Client, bool) {
 
 	_, err := client.Ping().Result()
 	if err == nil {
+		fmt.Print("New Cache Connection!")
 		return client, true
 	} else {
 		return client, false

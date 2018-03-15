@@ -1,0 +1,20 @@
+version: '2'
+services:
+  redis:
+    image: redis:3.2-alpine
+    volumes:
+      - redis_data:/data
+  app:
+    build: .
+    ports:
+    - "8787:8787"
+    depends_on:
+    - redis
+    environment:
+    - REDIS_HOST=redis
+    volumes:
+    - .:/code
+    - logvolume01:/var/log
+volumes:
+  redis_data:
+  logvolume01:
