@@ -13,7 +13,7 @@ import (
 
 func NewClient() (*redis.Client, bool) {
 	client := redis.NewClient(&redis.Options{
-		Addr: "localhost:6378",
+		Addr: "redis:6379",
 		DB:   0,
 	})
 
@@ -22,6 +22,7 @@ func NewClient() (*redis.Client, bool) {
 		fmt.Print("New Cache Connection!")
 		return client, true
 	} else {
+		fmt.Print("No Redis!")
 		return client, false
 	}
 }

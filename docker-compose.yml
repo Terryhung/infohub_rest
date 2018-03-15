@@ -4,8 +4,6 @@ services:
     image: redis:3.2-alpine
     volumes:
       - redis_data:/data
-    ports:
-    - "6378:6379"
   app:
     build: .
     ports:
