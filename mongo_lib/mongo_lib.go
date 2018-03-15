@@ -68,12 +68,14 @@ func GetForyou(country string, language string, category string, session *mgo.Se
 	results := []news.News{}
 	h_size := _size / 2
 
-	for len(results) < h_size {
+	for len(results) < h_size && len(categories) > 0 {
 		random_index := rand.Intn(len(categories))
 		category := categories[random_index]
 		p_results := GetNews(country, language, category, session, 1, r_client, r_status)
 		if len(p_results) > 0 {
 			results = append(results, p_results[0])
+		} else {
+			categories = append(categories[:random_index], categories[random_index+1:]...)
 		}
 	}
 
@@ -106,7 +108,7 @@ func GetNews(country string, language string, category string, session *mgo.Sess
 	constr := bson.M{"source_date_int": bson.M{"$gte": NowTSNorm() - 86400}, "category": category, "language": language, "country": country}
 	_ = col.Find(constr).Limit(200).Sort("-source_date_int").All(&results)
 	if len(results) == 0 {
-		constr := bson.M{"source_date_int": bson.M{"$gte": NowTSNorm() - 86400*3}, "category": category, "language": language, "country_array": bson.M{"$in": []string{"ALL", country}}}
+		constr := bson.M{"source_date_int": bson.M{"$gte": NowTSNorm() - 86400*3}, "category": category, "language": language, "country_array": "ALL"}
 		_ = col.Find(constr).Limit(200).Sort("-source_date_int").All(&results)
 	}
 
