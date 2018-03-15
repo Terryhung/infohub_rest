@@ -2,11 +2,11 @@ package mongo_lib
 
 import (
 	"crypto/sha1"
-	"fmt"
 	"math"
 	"math/rand"
 	"strings"
 	"time"
+	"log"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -92,7 +92,7 @@ func GetNews(country string, language string, category string, session *mgo.Sess
 	var results []news.News
 	keys := []string{country, language, category}
 	key := strings.Join(keys, "-")
-	fmt.Printf("key: %s", key)
+	log.Printf("key: %s", key)
 
 	if r_status {
 		_results := redis_lib.CheckExists(r_client, key)
