@@ -8,4 +8,4 @@ RUN go install -v
 
 ENTRYPOINT /go/bin/infohub_rest
 
-EXPOSE 8080
+EXPOSE 8787

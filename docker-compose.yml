@@ -12,9 +12,5 @@ services:
     - redis
     environment:
     - REDIS_HOST=redis
-    volumes:
-    - .:/code
-    - logvolume01:/var/log
 volumes:
   redis_data:
-  logvolume01:
