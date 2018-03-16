@@ -8,35 +8,39 @@ import (
 
 	"github.com/go-redis/redis"
 
+	"github.com/Terryhung/infohub_rest/gifimage"
 	"github.com/Terryhung/infohub_rest/news"
+	"github.com/Terryhung/infohub_rest/video"
 )
 
 func NewClient() (*redis.Client, bool) {
 	client := redis.NewClient(&redis.Options{
-		Addr: "redis:6379",
+		Addr: "localhost:6379",
 		DB:   0,
 	})
 
 	_, err := client.Ping().Result()
 	if err == nil {
-		fmt.Print("New Cache Connection!")
+		fmt.Print("New Cache Connection!\n")
 		return client, true
 	} else {
-		fmt.Print("No Redis!")
+		fmt.Print("No Redis!\n")
 		return client, false
 	}
 }
 
-func CheckExists(client *redis.Client, key string) []news.News {
+func CheckExists(client *redis.Client, key string, result interface{}) {
 	val, err := client.Get(key).Bytes()
-	results := []news.News{}
-	if err == nil {
-		fmt.Print("Hit\n")
-		json.Unmarshal(val, &results)
-	} else {
-		fmt.Print(err)
+	switch t := result.(type) {
+	case *[]video.Video, *[]news.News, *[]gifimage.GifImage:
+		if err == nil {
+			fmt.Print("Hit\n")
+			json.Unmarshal(val, &t)
+		} else {
+			fmt.Print(err)
+		}
+
 	}
-	return results
 }
 
 func SetValue(client *redis.Client, key string, val interface{}, duration_time int) bool {
