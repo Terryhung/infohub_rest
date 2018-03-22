@@ -137,10 +137,15 @@ func GetImages(country string, language string, category string, session *mgo.Se
 	}
 
 	col := session.DB("droi").C("cache")
-	constr := bson.M{"upserted_datetime": bson.M{"$gte": NowTSNorm()*1000 - 86400000}, "category": category, "language": language, "country_array": country, "_from": bson.M{"$regex": "videos/.*"}}
+	constr := bson.M{"upserted_datetime": bson.M{"$gte": NowTSNorm()*1000 - 86400000}, "category": category, "language": language, "country_array": country, "_from": bson.M{"$regex": "images/.*"}}
 	_ = col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
 	if len(results) == 0 {
-		constr := bson.M{"upserted_datetime": bson.M{"$gte": NowTSNorm()*1000 - 86400000}, "category": category, "language": language, "country_array": "ALL", "_from": bson.M{"$regex": "videos/.*"}}
+		constr := bson.M{"upserted_datetime": bson.M{"$gte": NowTSNorm()*1000 - 86400000}, "category": category, "language": language, "country_array": "ALL", "_from": bson.M{"$regex": "images/.*"}}
+		_ = col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
+	}
+
+	if len(results) == 0 {
+		constr := bson.M{"upserted_datetime": bson.M{"$gte": NowTSNorm()*1000 - 86400000}, "category": category, "language": "en", "country_array": "ALL", "_from": bson.M{"$regex": "images/.*"}}
 		_ = col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
 	}
 
@@ -173,6 +178,11 @@ func GetVideos(country string, language string, category string, session *mgo.Se
 	_ = col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
 	if len(results) == 0 {
 		constr := bson.M{"upserted_datetime": bson.M{"$gte": NowTSNorm()*1000 - 86400000}, "category": category, "language": language, "country_array": "ALL", "_from": bson.M{"$regex": "videos/.*"}}
+		_ = col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
+	}
+
+	if len(results) == 0 {
+		constr := bson.M{"upserted_datetime": bson.M{"$gte": NowTSNorm()*1000 - 86400000}, "category": category, "language": "en", "country_array": "ALL", "_from": bson.M{"$regex": "videos/.*"}}
 		_ = col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
 	}
 
