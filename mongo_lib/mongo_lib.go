@@ -219,6 +219,11 @@ func GetNews(country string, language string, category string, session *mgo.Sess
 		_ = col.Find(constr).Limit(200).Sort("-source_date_int").All(&results)
 	}
 
+	if len(results) == 0 && language != "ar" && language != "in" {
+		constr := bson.M{"source_date_int": bson.M{"$gte": NowTSNorm() - 86400*3}, "category": category, "language": "en", "country_array": bson.M{"$in": []string{"ALL", country}}}
+		_ = col.Find(constr).Limit(200).Sort("-source_date_int").All(&results)
+	}
+
 	redis_lib.SetValue(r_client, key, results, 6000)
 
 	if len(results) > 0 {
