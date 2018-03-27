@@ -7,8 +7,8 @@ type GifImage struct {
 	Like_numbers   int    `json:"like_numbers"`
 	Unlike_numbers int    `json:"unlike_numbers"`
 	Description    string `json:"description"`
-	Link           string `json:"link"`
 	Source_date    string `json:"source_date"`
 	ClassName      string `json:"_ClassName"`
 	Id             string `json:"_Id"`
+	Video_url      string `json:"video_url"`
 }
