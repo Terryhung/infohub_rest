@@ -90,7 +90,7 @@ func RandomChoiceImage(dataset []gifimage.GifImage, _size int) []gifimage.GifIma
 	for i := 0; i < _size; i++ {
 		random_index := rand.Intn(len(dataset))
 		dataset[random_index].ClassName = "image"
-		dataset[random_index].Id = MD5SHA1(dataset[random_index].Link, h, hasher)[:24]
+		dataset[random_index].Id = MD5SHA1(dataset[random_index].Image_url, h, hasher)[:24]
 		results = append(results, dataset[random_index])
 	}
 	return results
