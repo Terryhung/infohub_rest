@@ -11,7 +11,7 @@ type News struct {
 	Page_link         string   `json:"page_link"`
 	Link              string   `json:"link"`
 	Explicit_keywords []string `json:"explicit_keywords"`
-	Source_date       string   `json:"source_date"`
+	Source_date_int   int      `json:"source_date_int"`
 	Similar_ids       []string `json:"similar_ids"`
 	ClassName         string   `json:"_ClassName"`
 	Id                string   `json:"_Id"`
