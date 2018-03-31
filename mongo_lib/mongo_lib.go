@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"log"
+
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
@@ -94,6 +96,17 @@ func RandomChoiceImage(dataset []gifimage.GifImage, _size int) []gifimage.GifIma
 		results = append(results, dataset[random_index])
 	}
 	return results
+}
+
+func InsertData(db_name string, col_name string, session *mgo.Session, data interface{}) bool {
+	status := true
+	col := session.DB(db_name).C(col_name)
+	err := col.Insert(data)
+	if err != nil {
+		status = false
+		log.Fatal(err)
+	}
+	return status
 }
 
 func GetForyou(country string, language string, category string, session *mgo.Session, _size int, r_client *redis.Client, r_status bool) []news.News {
