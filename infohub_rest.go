@@ -13,12 +13,14 @@ import (
 
 	"github.com/Terryhung/infohub_rest/mongo_lib"
 	"github.com/Terryhung/infohub_rest/redis_lib"
+	"github.com/Terryhung/infohub_rest/user_event"
 	"github.com/ant0ine/go-json-rest/rest"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/yaml.v2"
 )
 
+// Structure for DB login and API Respond
 type User struct {
 	Type     string
 	Host     string
@@ -43,6 +45,7 @@ type Respond struct {
 	Result Result
 }
 
+// Routing
 func main() {
 	api := rest.NewApi()
 	api.Use(rest.DefaultCommonStack...)
@@ -52,6 +55,7 @@ func main() {
 		rest.Get("/get_video", GetVideo),
 		rest.Get("/get_image", GetImage),
 		rest.Get("/get_all", GetAll),
+		rest.Post("/v1/user_event", PostUserEvent),
 	)
 
 	if err != nil {
@@ -63,6 +67,7 @@ func main() {
 
 var lock = sync.RWMutex{}
 
+// Unit Function For Rest
 func CheckParameters(r *rest.Request, needed_fields []string) (bool, map[string]string) {
 	var result map[string]string
 	result = make(map[string]string)
@@ -76,10 +81,39 @@ func CheckParameters(r *rest.Request, needed_fields []string) (bool, map[string]
 	return true, result
 }
 
+// DB Connection
 var sessions = createConnections(20, "i7")
 var sessions_taipei = createConnections(20, "taipei_server")
-
 var redis_client, r_status = redis_lib.NewClient()
+
+// REST APIs
+func PostUserEvent(w rest.ResponseWriter, r *rest.Request) {
+	lock.RLock()
+
+	// Check Header and mode
+	db_name := "infohub_sandbox"
+	if r.Header.Get("mode") == "production" {
+		db_name = "infohub"
+	}
+
+	// Variable
+	status := false
+
+	// Dealing with Post Body
+	user_event_data := user_event.UserEvent{}
+	err := r.DecodeJsonPayload(&user_event_data)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// User Event
+	random_index := rand.Intn(20)
+	if user_event_data.Check() {
+		status = mongo_lib.InsertData(db_name, "user_event", sessions[random_index], user_event_data)
+	}
+	w.WriteJson(status)
+	lock.RUnlock()
+}
 
 func GetAll(w rest.ResponseWriter, r *rest.Request) {
 	lock.RLock()
