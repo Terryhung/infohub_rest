@@ -1,5 +1,7 @@
 package news
 
+import "github.com/Terryhung/infohub_rest/utils"
+
 type News struct {
 	Title             string   `json:"title"`
 	Source_name       string   `json:"source_name"`
@@ -15,4 +17,9 @@ type News struct {
 	Similar_ids       []string `json:"similar_ids"`
 	ClassName         string   `json:"_ClassName"`
 	Id                string   `json:"_Id"`
+}
+
+func (n *News) Append() {
+	n.ClassName = "news"
+	n.Id = utils.SpecialID(n.Link)
 }
