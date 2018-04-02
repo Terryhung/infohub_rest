@@ -33,15 +33,28 @@ type Account struct {
 	Mongo_users []User
 }
 
+func RandomChoiceGeneral(dataset interface{}, _size int) {
+	switch t := dataset.(type) {
+	case *[]news.News:
+		results := []news.News{}
+		for i := 0; i < _size; i++ {
+			s := *t
+			random_index := rand.Intn(len(s))
+			news := s[random_index]
+			news.Append()
+			results = append(results, news)
+		}
+		*t = results
+	}
+}
+
 func RandomChoice(dataset []news.News, _size int) []news.News {
 	results := []news.News{}
-	h := sha1.New()
-	hasher := md5.New()
 	for i := 0; i < _size; i++ {
 		random_index := rand.Intn(len(dataset))
-		dataset[random_index].ClassName = "news"
-		dataset[random_index].Id = utils.MD5SHA1(dataset[random_index].Link, h, hasher)[:24]
-		results = append(results, dataset[random_index])
+		news := dataset[random_index]
+		news.Append()
+		results = append(results, news)
 	}
 	return results
 }
@@ -215,6 +228,7 @@ func GetNews(country string, language string, category string, session *mgo.Sess
 
 	if len(results) > 0 {
 		results = RandomChoice(results, _size)
+		// RandomChoiceGeneral(&results, _size)
 	}
 
 	return results
