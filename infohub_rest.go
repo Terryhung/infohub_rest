@@ -109,6 +109,10 @@ func PostUserEvent(w rest.ResponseWriter, r *rest.Request) {
 	// User Event
 	random_index := rand.Intn(20)
 	if user_event_data.Check() {
+		// Append Timestamp
+		user_event_data.Append()
+
+		// Insert Data into Mongo
 		status = mongo_lib.InsertData(db_name, "user_event", sessions[random_index], user_event_data)
 	}
 	w.WriteJson(status)
