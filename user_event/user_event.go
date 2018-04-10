@@ -7,7 +7,10 @@ import (
 type UserEvent struct {
 	Event_name        string `json:"event_name"`
 	Info_id           string `json:"info_id"`
-	Ga_id             string `json:"ga_id"`
+	Device_id         string `json:"device_id"`
+	Gaid              string `json:"gaid"`
+	Country           string `json:"country"`
+	Area              string `json:"area"`
 	News_id           string `json:"news_id"`
 	Keyword           string `json:"keyword"`
 	Created_timestamp int    `json:"created_timestamp"`
@@ -31,7 +34,7 @@ func (c UserEvent) Check() bool {
 		"add_category":      3,
 	}
 	// Check Needed fields: Can not be nil
-	if c.Event_name == "" || c.Ga_id == "" {
+	if c.Event_name == "" || c.Gaid == "" {
 		status = false
 	}
 
