@@ -103,17 +103,18 @@ func PostUserEvent(w rest.ResponseWriter, r *rest.Request) {
 	user_event_data := user_event.UserEvent{}
 	err := r.DecodeJsonPayload(&user_event_data)
 	if err != nil {
-		log.Fatal(err)
-	}
+		log.Print(err)
+	} else {
 
-	// User Event
-	random_index := rand.Intn(20)
-	if user_event_data.Check() {
-		// Append Timestamp
-		user_event_data.Append()
+		// User Event
+		random_index := rand.Intn(20)
+		if user_event_data.Check() {
+			// Append Timestamp
+			user_event_data.Append()
 
-		// Insert Data into Mongo
-		status = mongo_lib.InsertData(db_name, "user_event", sessions[random_index], user_event_data)
+			// Insert Data into Mongo
+			status = mongo_lib.InsertData(db_name, "user_event", sessions[random_index], user_event_data)
+		}
 	}
 	w.WriteJson(status)
 	lock.RUnlock()
