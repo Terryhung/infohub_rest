@@ -85,15 +85,17 @@ func RandomChoiceImage(dataset []gifimage.GifImage, _size int) []gifimage.GifIma
 	return results
 }
 
-func InsertData(db_name string, col_name string, session *mgo.Session, data interface{}) bool {
+func InsertData(db_name string, col_name string, session *mgo.Session, data interface{}) (bool, string) {
 	status := true
+	msg := "Insert Data Successfully!"
 	col := session.DB(db_name).C(col_name)
 	err := col.Insert(data)
 	if err != nil {
 		status = false
 		log.Fatal(err)
+		msg = err.Error()
 	}
-	return status
+	return status, msg
 }
 
 func GetForyou(country string, language string, category string, session *mgo.Session, _size int, r_client *redis.Client, r_status bool) []news.News {
@@ -232,4 +234,14 @@ func GetNews(country string, language string, category string, session *mgo.Sess
 	}
 
 	return results
+}
+
+func CheckExist(db_name string, col_name string, session *mgo.Session, cond bson.M) bool {
+	exists := false
+	col := session.DB(db_name).C(col_name)
+	count, _ := col.Find(cond).Count()
+	if count > 0 {
+		exists = true
+	}
+	return exists
 }
