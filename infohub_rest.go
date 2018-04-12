@@ -11,12 +11,14 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/Terryhung/infohub_rest/infohub_user"
 	"github.com/Terryhung/infohub_rest/mongo_lib"
 	"github.com/Terryhung/infohub_rest/redis_lib"
 	"github.com/Terryhung/infohub_rest/user_event"
 	"github.com/ant0ine/go-json-rest/rest"
 
 	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/yaml.v2"
 )
 
@@ -98,25 +100,26 @@ func PostUserEvent(w rest.ResponseWriter, r *rest.Request) {
 
 	// Variable
 	status := false
+	msg := "Error Message"
 
 	// Dealing with Post Body
-	user_event_data := user_event.UserEvent{}
-	err := r.DecodeJsonPayload(&user_event_data)
+	user_event := user_event.UserEvent{}
+	err := r.DecodeJsonPayload(&user_event)
 	if err != nil {
 		log.Print(err)
 	} else {
+		// Session
+		random_index := rand.Intn(20)
+		session := sessions[random_index]
 
 		// User Event
-		random_index := rand.Intn(20)
-		if user_event_data.Check() {
-			// Append Timestamp
-			user_event_data.Append()
+		status, msg = user_event.InsertOne(db_name, session)
 
-			// Insert Data into Mongo
-			status = mongo_lib.InsertData(db_name, "user_event", sessions[random_index], user_event_data)
-		}
+		// User
+		user := infohub_user.InfohubUser{Gaid: user_event.Gaid}
+		user.Update(db_name, session)
 	}
-	w.WriteJson(status)
+	w.WriteJson(bson.M{"Status": status, "Message": msg})
 	lock.RUnlock()
 }
 

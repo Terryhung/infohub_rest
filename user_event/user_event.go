@@ -1,7 +1,9 @@
 package user_event
 
 import (
+	"github.com/Terryhung/infohub_rest/mongo_lib"
 	"github.com/Terryhung/infohub_rest/utils"
+	mgo "gopkg.in/mgo.v2"
 )
 
 type UserEvent struct {
@@ -16,8 +18,18 @@ type UserEvent struct {
 	Created_timestamp int    `json:"created_timestamp"`
 }
 
-func (c *UserEvent) Append() {
+func (c *UserEvent) AppendField() {
 	c.Created_timestamp = utils.NowTS()
+}
+
+func (c *UserEvent) InsertOne(db_name string, session *mgo.Session) (bool, string) {
+	status := false
+	msg := "User Event format Error!"
+	if c.Check() {
+		c.AppendField()
+		status, msg = mongo_lib.InsertData(db_name, "user_event", session, &c)
+	}
+	return status, msg
 }
 
 func (c UserEvent) Check() bool {
