@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Terryhung/infohub_rest/mongo_lib"
+	"github.com/Terryhung/infohub_rest/news"
 	"github.com/Terryhung/infohub_rest/utils"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -23,14 +24,17 @@ func (i *InfohubUser) NewOne(db_name string, session *mgo.Session) (bool, string
 	return status, msg
 }
 
-func (i *InfohubUser) Update(db_name string, session *mgo.Session) {
+func (i *InfohubUser) Update(db_name string, session *mgo.Session, news_id string) {
 	var user_profile = bson.M{"gaid": i.Gaid}
 	exists := mongo_lib.CheckExist(db_name, "user_profile", session, user_profile)
-	if exists {
-		fmt.Print("Exists!\n")
-	} else {
+	if !exists {
 		fmt.Print("Not Exists!\n")
 		_, msg := i.NewOne(db_name, session)
 		fmt.Print(msg)
+	}
+	news := news.News{Id: news_id}
+	news_exists := news.CheckExist(session)
+	if news_exists {
+		fmt.Print(news)
 	}
 }

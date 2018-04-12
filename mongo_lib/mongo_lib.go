@@ -245,3 +245,13 @@ func CheckExist(db_name string, col_name string, session *mgo.Session, cond bson
 	}
 	return exists
 }
+
+func FindOne(db_name string, col_name string, session *mgo.Session, cond bson.M, data interface{}) bool {
+	exists := false
+	col := session.DB(db_name).C(col_name)
+	count, _ := col.Find(cond).Count()
+	if count > 0 {
+		col.Find(cond).One(&data)
+	}
+	return exists
+}

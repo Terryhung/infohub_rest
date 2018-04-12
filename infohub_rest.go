@@ -117,7 +117,7 @@ func PostUserEvent(w rest.ResponseWriter, r *rest.Request) {
 
 		// User
 		user := infohub_user.InfohubUser{Gaid: user_event.Gaid}
-		user.Update(db_name, session)
+		user.Update(db_name, session, user_event.News_id)
 	}
 	w.WriteJson(bson.M{"Status": status, "Message": msg})
 	lock.RUnlock()
