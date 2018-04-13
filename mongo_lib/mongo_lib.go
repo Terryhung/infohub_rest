@@ -246,12 +246,22 @@ func CheckExist(db_name string, col_name string, session *mgo.Session, cond bson
 	return exists
 }
 
-func FindOne(db_name string, col_name string, session *mgo.Session, cond bson.M, data interface{}) bool {
+func FindOne(db_name string, col_name string, session *mgo.Session, cond bson.M, data interface{}) (bool, *mgo.Collection) {
 	exists := false
 	col := session.DB(db_name).C(col_name)
 	count, _ := col.Find(cond).Count()
 	if count > 0 {
-		col.Find(cond).One(&data)
+		exists = true
 	}
-	return exists
+	return exists, col
+}
+
+func UpdateOne(db_name string, col_name string, session *mgo.Session, cond bson.M, _id bson.M) bool {
+	status := false
+	col := session.DB(db_name).C(col_name)
+	err := col.Update(_id, bson.M{"$set": cond})
+	if err == nil {
+		status = true
+	}
+	return status
 }
