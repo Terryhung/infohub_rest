@@ -34,7 +34,6 @@ func CheckExists(client *redis.Client, key string, result interface{}) {
 	switch t := result.(type) {
 	case *[]video.Video, *[]news.News, *[]gifimage.GifImage:
 		if err == nil {
-			fmt.Print("Hit\n")
 			json.Unmarshal(val, &t)
 		} else {
 			fmt.Print(err)
@@ -49,7 +48,6 @@ func SetValue(client *redis.Client, key string, val interface{}, duration_time i
 	if err != nil {
 		return false
 	} else {
-		fmt.Print("Save Cache\n")
 		return true
 	}
 }

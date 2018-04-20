@@ -151,7 +151,7 @@ func GetImages(country string, language string, category string, session *mgo.Se
 		_ = col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
 	}
 
-	redis_lib.SetValue(r_client, key, results, 6000)
+	redis_lib.SetValue(r_client, key, results, 600)
 
 	if len(results) > 0 {
 		results = RandomChoiceImage(results, _size)
@@ -188,7 +188,7 @@ func GetVideos(country string, language string, category string, session *mgo.Se
 		_ = col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
 	}
 
-	redis_lib.SetValue(r_client, key, results, 6000)
+	redis_lib.SetValue(r_client, key, results, 600)
 
 	if len(results) > 0 {
 		results = RandomChoiceVideo(results, _size)
@@ -226,7 +226,7 @@ func GetNews(country string, language string, category string, session *mgo.Sess
 		_ = col.Find(constr).Limit(200).Sort("-source_date_int").All(&results)
 	}
 
-	redis_lib.SetValue(r_client, key, results, 6000)
+	redis_lib.SetValue(r_client, key, results, 600)
 
 	if len(results) > 0 {
 		results = RandomChoice(results, _size)
