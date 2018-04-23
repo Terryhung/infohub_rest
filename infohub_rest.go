@@ -13,6 +13,7 @@ import (
 
 	"github.com/Terryhung/infohub_rest/infohub_user"
 	"github.com/Terryhung/infohub_rest/mongo_lib"
+	"github.com/Terryhung/infohub_rest/news"
 	"github.com/Terryhung/infohub_rest/redis_lib"
 	"github.com/Terryhung/infohub_rest/user_event"
 	"github.com/ant0ine/go-json-rest/rest"
@@ -58,6 +59,7 @@ func main() {
 		rest.Get("/get_image", GetImage),
 		rest.Get("/get_all", GetAll),
 		rest.Post("/v1/user_event", PostUserEvent),
+		rest.Get("/v1/keyword", GetNewsByKeyword),
 	)
 
 	if err != nil {
@@ -120,6 +122,29 @@ func PostUserEvent(w rest.ResponseWriter, r *rest.Request) {
 		user.Update(db_name, session, user_event.News_id)
 	}
 	w.WriteJson(bson.M{"Status": status, "Message": msg})
+	lock.RUnlock()
+}
+
+func GetNewsByKeyword(w rest.ResponseWriter, r *rest.Request) {
+	lock.RLock()
+	needed_fields := []string{"keyword"}
+	_, params := CheckParameters(r, needed_fields)
+	n := news.News{}
+
+	// Get news
+	var results []news.News
+	random_index := rand.Intn(20)
+	session := sessions[random_index]
+	n.GetByKeyword(params["keyword"], session, &results)
+
+	// Respond
+	result := Result{"OK", nil, nil, nil}
+
+	if len(results) > 0 {
+		result = Result{"OK", results, nil, nil}
+	}
+	var respond = Respond{0, result}
+	w.WriteJson(&respond)
 	lock.RUnlock()
 }
 

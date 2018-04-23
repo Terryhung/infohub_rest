@@ -1,6 +1,8 @@
 package news
 
 import (
+	"strings"
+
 	"github.com/Terryhung/infohub_rest/utils"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -39,4 +41,20 @@ func (n *News) CheckExist(session *mgo.Session) bool {
 		exists = true
 	}
 	return exists
+}
+
+func (n *News) GetByKeyword(kw string, session *mgo.Session, results interface{}) {
+	// Regular Expression
+	s := []string{".*", kw, ".*"}
+	regex := strings.Join(s, "")
+
+	// Condition
+	cond := bson.M{"title": bson.M{"$regex": regex}}
+	col := session.DB("analysis").C("news_meta_baas")
+	count, _ := col.Find(cond).Count()
+
+	// results
+	if count > 0 {
+		col.Find(cond).All(results)
+	}
 }
