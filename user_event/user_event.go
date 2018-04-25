@@ -8,6 +8,7 @@ import (
 
 type UserEvent struct {
 	Event             string `json:"event"`
+	Event_src         string `json:"event_src"`
 	Dev_id            string `json:"dev_id"`
 	Gaid              string `json:"gaid"`
 	Country           string `json:"country"`
@@ -35,14 +36,13 @@ func (c *UserEvent) InsertOne(db_name string, session *mgo.Session) (bool, strin
 func (c UserEvent) Check() bool {
 	status := true
 	valid_event_name := map[string]int{
-		"view_list":   0,
-		"view_push":   1,
-		"view_relate": 1,
-		"like":        1,
-		"dislike":     1,
-		"share":       1,
-		"comment":     1,
-		"bookmark":    1,
+		"view":     0,
+		"add":      0,
+		"like":     1,
+		"dislike":  1,
+		"share":    1,
+		"comment":  1,
+		"bookmark": 1,
 	}
 	// Check Needed fields: Can not be nil
 	if c.Event == "" || c.Gaid == "" {
