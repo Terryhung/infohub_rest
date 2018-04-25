@@ -101,8 +101,8 @@ func PostUserEvent(w rest.ResponseWriter, r *rest.Request) {
 	}
 
 	// Variable
-	status := false
 	msg := "Error Message"
+	Code := -1
 
 	log.Print(r)
 
@@ -111,19 +111,23 @@ func PostUserEvent(w rest.ResponseWriter, r *rest.Request) {
 	err := r.DecodeJsonPayload(&user_event)
 	if err != nil {
 		log.Print(err)
+		msg = err.Error()
 	} else {
 		// Session
 		random_index := rand.Intn(20)
 		session := sessions[random_index]
 
 		// User Event
-		status, msg = user_event.InsertOne(db_name, session)
+		_, msg = user_event.InsertOne(db_name, session)
 
 		// User
 		user := infohub_user.InfohubUser{Gaid: user_event.Gaid}
 		user.Update(db_name, session, user_event.News_id)
+		Code = 0
 	}
-	w.WriteJson(bson.M{"Status": status, "Message": msg})
+
+	// Return
+	w.WriteJson(bson.M{"Code": Code, "Result": bson.M{"Message": msg}})
 	lock.RUnlock()
 }
 
