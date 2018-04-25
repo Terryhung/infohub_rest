@@ -104,6 +104,8 @@ func PostUserEvent(w rest.ResponseWriter, r *rest.Request) {
 	status := false
 	msg := "Error Message"
 
+	log.Print(r)
+
 	// Dealing with Post Body
 	user_event := user_event.UserEvent{}
 	err := r.DecodeJsonPayload(&user_event)
