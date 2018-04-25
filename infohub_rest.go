@@ -104,8 +104,6 @@ func PostUserEvent(w rest.ResponseWriter, r *rest.Request) {
 	msg := "Error Message"
 	Code := -1
 
-	log.Print(r)
-
 	// Dealing with Post Body
 	user_event := user_event.UserEvent{}
 	err := r.DecodeJsonPayload(&user_event)
@@ -122,7 +120,7 @@ func PostUserEvent(w rest.ResponseWriter, r *rest.Request) {
 
 		// User
 		user := infohub_user.InfohubUser{Gaid: user_event.Gaid}
-		user.Update(db_name, session, user_event.News_id)
+		user.Update(db_name, session, user_event.Content_id)
 		Code = 0
 	}
 

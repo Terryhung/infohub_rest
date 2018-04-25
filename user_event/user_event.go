@@ -7,14 +7,14 @@ import (
 )
 
 type UserEvent struct {
-	Event_name        string `json:"event_name"`
-	Info_id           string `json:"info_id"`
-	Device_id         string `json:"device_id"`
+	Event             string `json:"event"`
+	Dev_id            string `json:"dev_id"`
 	Gaid              string `json:"gaid"`
 	Country           string `json:"country"`
 	Area              string `json:"area"`
-	News_id           string `json:"news_id"`
-	Keyword           string `json:"keyword"`
+	Content_id        string `json:"content_id"`
+	Content_type      string `json:"content_type"`
+	Content_category  string `json:"content_category"`
 	Created_timestamp int    `json:"created_timestamp"`
 }
 
@@ -35,34 +35,32 @@ func (c *UserEvent) InsertOne(db_name string, session *mgo.Session) (bool, strin
 func (c UserEvent) Check() bool {
 	status := true
 	valid_event_name := map[string]int{
-		"c_p": 0,
-		"r_a": 1,
-		"r_n": 1,
-		"com": 1,
-		"c_l": 1,
-		"b":   1,
+		"view_list":   0,
+		"view_push":   1,
+		"view_relate": 1,
+		"like":        1,
+		"dislike":     1,
+		"share":       1,
+		"comment":     1,
+		"bookmark":    1,
 	}
 	// Check Needed fields: Can not be nil
-	if c.Event_name == "" || c.Gaid == "" {
+	if c.Event == "" || c.Gaid == "" {
 		status = false
 	}
 
 	// Check Event Name Valid or not
-	check_type, ok := valid_event_name[c.Event_name]
+	check_type, ok := valid_event_name[c.Event]
 	if !ok {
 		status = false
 	} else {
 		switch check_type {
 		// News id cant not be nil
 		case 1:
-			if c.News_id == "" {
+			if c.Content_id == "" {
 				status = false
 			}
-		// Must provide keyword string
-		case 2:
-			if c.Keyword == "" {
-				status = false
-			}
+			// Must provide keyword string
 		}
 	}
 	return status
