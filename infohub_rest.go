@@ -15,6 +15,7 @@ import (
 	"github.com/Terryhung/infohub_rest/mongo_lib"
 	"github.com/Terryhung/infohub_rest/news"
 	"github.com/Terryhung/infohub_rest/redis_lib"
+	"github.com/Terryhung/infohub_rest/stock"
 	"github.com/Terryhung/infohub_rest/user_event"
 	"github.com/ant0ine/go-json-rest/rest"
 
@@ -60,6 +61,7 @@ func main() {
 		rest.Get("/get_all", GetAll),
 		rest.Post("/v1/user_event", PostUserEvent),
 		rest.Get("/v1/keyword", GetNewsByKeyword),
+		rest.Get("/v1/stocks", GetStockList),
 	)
 
 	if err != nil {
@@ -149,6 +151,20 @@ func GetNewsByKeyword(w rest.ResponseWriter, r *rest.Request) {
 	}
 	var respond = Respond{0, result}
 	w.WriteJson(&respond)
+	lock.RUnlock()
+}
+
+func GetStockList(w rest.ResponseWriter, r *rest.Request) {
+	lock.RLock()
+	n := stock.Stock{}
+
+	// Get news
+	var results []stock.Stock
+	random_index := rand.Intn(20)
+	session := sessions[random_index]
+	n.GetStockList(session, &results)
+
+	w.WriteJson(bson.M{"Code": 0, "Result": bson.M{"Stocks": results}})
 	lock.RUnlock()
 }
 
