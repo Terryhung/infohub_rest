@@ -59,6 +59,7 @@ func main() {
 		rest.Get("/get_video", GetVideo),
 		rest.Get("/get_image", GetImage),
 		rest.Get("/get_all", GetAll),
+		rest.Get("/ping", Ping),
 		rest.Post("/v1/user_event", PostUserEvent),
 		rest.Get("/v1/keyword", GetNewsByKeyword),
 		rest.Get("/v1/stocks", GetStockList),
@@ -93,6 +94,12 @@ var sessions_taipei = createConnections(20, "taipei_server")
 var redis_client, r_status = redis_lib.NewClient()
 
 // REST APIs
+func Ping(w rest.ResponseWriter, r *rest.Request) {
+	lock.RLock()
+	w.WriteJson(bson.M{"Code": 0, "Result": "pong"})
+	lock.RUnlock()
+}
+
 func PostUserEvent(w rest.ResponseWriter, r *rest.Request) {
 	lock.RLock()
 
