@@ -89,8 +89,9 @@ func CheckParameters(r *rest.Request, needed_fields []string) (bool, map[string]
 }
 
 // DB Connection
-var sessions = createConnections(20, "i7")
-var sessions_taipei = createConnections(20, "taipei_server")
+var RConNum = 50
+var sessions = createConnections(RConNum, "i7")
+var sessions_taipei = createConnections(RConNum, "taipei_server")
 var redis_client, r_status = redis_lib.NewClient()
 
 // REST APIs
@@ -146,7 +147,7 @@ func GetNewsByKeyword(w rest.ResponseWriter, r *rest.Request) {
 
 	// Get news
 	var results []news.News
-	random_index := rand.Intn(20)
+	random_index := rand.Intn(RConNum)
 	session := sessions[random_index]
 	n.GetByKeyword(params["keyword"], session, &results)
 
@@ -167,7 +168,7 @@ func GetStockList(w rest.ResponseWriter, r *rest.Request) {
 
 	// Get news
 	var results []stock.Stock
-	random_index := rand.Intn(20)
+	random_index := rand.Intn(RConNum)
 	session := sessions[random_index]
 	n.GetStockList(session, &results)
 
@@ -179,7 +180,7 @@ func GetAll(w rest.ResponseWriter, r *rest.Request) {
 	lock.RLock()
 	needed_fields := []string{"country", "language", "category", "news_limit", "video_limit", "image_limit"}
 	status, params := CheckParameters(r, needed_fields)
-	random_index := rand.Intn(20)
+	random_index := rand.Intn(RConNum)
 	if !status {
 		var r_json map[string]string
 		r_json = make(map[string]string)
@@ -209,7 +210,7 @@ func GetImage(w rest.ResponseWriter, r *rest.Request) {
 	needed_fields := []string{"country", "language", "category"}
 	status, params := CheckParameters(r, needed_fields)
 
-	random_index := rand.Intn(20)
+	random_index := rand.Intn(RConNum)
 
 	if !status {
 		var r_json map[string]string
@@ -237,7 +238,7 @@ func GetVideo(w rest.ResponseWriter, r *rest.Request) {
 	needed_fields := []string{"country", "language", "category"}
 	status, params := CheckParameters(r, needed_fields)
 
-	random_index := rand.Intn(20)
+	random_index := rand.Intn(RConNum)
 
 	if !status {
 		var r_json map[string]string
@@ -265,7 +266,7 @@ func GetNews(w rest.ResponseWriter, r *rest.Request) {
 	needed_fields := []string{"country", "language", "category"}
 	status, params := CheckParameters(r, needed_fields)
 
-	random_index := rand.Intn(20)
+	random_index := rand.Intn(RConNum)
 
 	if !status {
 		var r_json map[string]string
@@ -288,8 +289,8 @@ func GetNews(w rest.ResponseWriter, r *rest.Request) {
 	lock.RUnlock()
 }
 
-func createConnections(num int, account string) [20]*mgo.Session {
-	var sessions [20]*mgo.Session
+func createConnections(num int, account string) [50]*mgo.Session {
+	var sessions [50]*mgo.Session
 	for i := 0; i < num; i++ {
 		mongo_url, err := MongoAccount(account)
 		session, err := mgo.Dial(mongo_url)
