@@ -18,6 +18,7 @@ import (
 	"github.com/Terryhung/infohub_rest/stock"
 	"github.com/Terryhung/infohub_rest/user_event"
 	"github.com/ant0ine/go-json-rest/rest"
+	"github.com/go-redis/redis"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -93,6 +94,7 @@ var RConNum = 50
 var sessions = createConnections(RConNum, "i7")
 var sessions_taipei = createConnections(RConNum, "taipei_server")
 var redis_client, r_status = redis_lib.NewClient()
+var redis_clients = createClients(RConNum)
 
 // REST APIs
 func Ping(w rest.ResponseWriter, r *rest.Request) {
@@ -193,7 +195,7 @@ func GetAll(w rest.ResponseWriter, r *rest.Request) {
 		video_limit, _ := strconv.Atoi(params["video_limit"])
 		video_results := mongo_lib.GetVideos(params["country"], params["language"], params["category"], sessions_taipei[random_index], video_limit, redis_client, r_status)
 		news_limit, _ := strconv.Atoi(params["news_limit"])
-		news_results := mongo_lib.GetNews(params["country"], params["language"], params["category"], sessions[random_index], news_limit, redis_client, r_status)
+		news_results := mongo_lib.GetNews(params["country"], params["language"], params["category"], sessions[random_index], news_limit, redis_clients[random_index], r_status)
 
 		var result = Result{"No Data", nil, nil, nil}
 		result = Result{"OK", news_results, video_results, image_results}
@@ -304,6 +306,15 @@ func createConnections(num int, account string) [50]*mgo.Session {
 	}
 
 	return sessions
+}
+
+func createClients(num int) [50]*redis.Client {
+	var clients [50]*redis.Client
+	for i := 0; i < num; i++ {
+		var redis_client, _ = redis_lib.NewClient()
+		clients[i] = redis_client
+	}
+	return clients
 }
 
 func MongoAccount(_type string) (string, error) {
