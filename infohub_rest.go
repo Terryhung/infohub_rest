@@ -17,6 +17,7 @@ import (
 	"github.com/Terryhung/infohub_rest/redis_lib"
 	"github.com/Terryhung/infohub_rest/stock"
 	"github.com/Terryhung/infohub_rest/user_event"
+	"github.com/Terryhung/infohub_rest/video"
 	"github.com/ant0ine/go-json-rest/rest"
 	"github.com/go-redis/redis"
 
@@ -192,8 +193,12 @@ func GetAll(w rest.ResponseWriter, r *rest.Request) {
 	} else {
 		image_limit, _ := strconv.Atoi(params["image_limit"])
 		image_results := mongo_lib.GetImages(params["country"], params["language"], params["category"], sessions_taipei[random_index], image_limit, redis_client, r_status)
+		// Get video
 		video_limit, _ := strconv.Atoi(params["video_limit"])
-		video_results := mongo_lib.GetVideos(params["country"], params["language"], params["category"], sessions_taipei[random_index], video_limit, redis_client, r_status)
+		video_results := []video.Video{}
+		if video_limit > 0 {
+			video_results = mongo_lib.GetVideos(params["country"], params["language"], params["category"], sessions_taipei[random_index], video_limit, redis_client, r_status)
+		}
 		news_limit, _ := strconv.Atoi(params["news_limit"])
 		news_results := mongo_lib.GetNews(params["country"], params["language"], params["category"], sessions[random_index], news_limit, redis_clients[random_index], r_status)
 
