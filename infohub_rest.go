@@ -67,7 +67,7 @@ func main() {
 		rest.Get("/v1/stocks", GetStockList),
 
 		// BaaS
-		rest.Get("infohub_task_handler", GetAll),
+		rest.Get("/infohub_task_handler", GetAll),
 	)
 
 	if err != nil {
