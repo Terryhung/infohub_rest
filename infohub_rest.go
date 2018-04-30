@@ -65,6 +65,9 @@ func main() {
 		rest.Post("/v1/user_event", PostUserEvent),
 		rest.Get("/v1/keyword", GetNewsByKeyword),
 		rest.Get("/v1/stocks", GetStockList),
+
+		// BaaS
+		rest.Get("infohub_task_handler", GetAll),
 	)
 
 	if err != nil {
