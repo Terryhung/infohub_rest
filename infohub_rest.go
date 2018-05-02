@@ -65,6 +65,7 @@ func main() {
 		rest.Post("/v1/user_event", PostUserEvent),
 		rest.Get("/v1/keyword", GetNewsByKeyword),
 		rest.Get("/v1/stocks", GetStockList),
+		rest.Get("/v1/stocks_price", GetStockPrice),
 
 		// BaaS
 		rest.Get("/infohub_task_handler", GetAll),
@@ -165,6 +166,20 @@ func GetNewsByKeyword(w rest.ResponseWriter, r *rest.Request) {
 	}
 	var respond = Respond{0, result}
 	w.WriteJson(&respond)
+	lock.RUnlock()
+}
+
+func GetStockPrice(w rest.ResponseWriter, r *rest.Request) {
+	lock.RLock()
+	n := stock.Stock{}
+
+	// Get news
+	var results []stock.Stock
+	random_index := rand.Intn(RConNum)
+	session := sessions[random_index]
+	n.GetStockPrice(session, &results)
+
+	w.WriteJson(bson.M{"Code": 0, "Result": bson.M{"Stocks": results}})
 	lock.RUnlock()
 }
 
