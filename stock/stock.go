@@ -11,6 +11,7 @@ type Stock struct {
 	Name       string  `json:"name"`
 	Prediction float64 `json:"prediction"`
 	Diff       float64 `json:"diff"`
+	Price      float64 `json:"price"`
 }
 
 func (s *Stock) GetStockList(session *mgo.Session, results interface{}) {
