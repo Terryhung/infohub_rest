@@ -99,7 +99,7 @@ func InsertData(db_name string, col_name string, session *mgo.Session, data inte
 }
 
 func GetForyou(country string, language string, category string, session *mgo.Session, _size int, r_client *redis.Client, r_status bool) []news.News {
-	categories := []string{"pets", "girls", "food"}
+	categories := []string{"pets", "girls", "food", "entertainment", "travel"}
 	results := []news.News{}
 	h_size := _size / 2
 
