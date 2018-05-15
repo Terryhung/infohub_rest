@@ -24,7 +24,6 @@ type News struct {
 	ClassName         string   `json:"_ClassName"`
 	Id                string   `json:"_Id"`
 	Category          []string `json:"category"`
-	Prediction        float64  `json:"prediction"`
 }
 
 func (n *News) Append() {
