@@ -256,6 +256,18 @@ func FindOne(db_name string, col_name string, session *mgo.Session, cond bson.M,
 	count, _ := col.Find(cond).Count()
 	if count > 0 {
 		exists = true
+		col.Find(cond).One(data)
+	}
+	return exists, col
+}
+
+func Find(db_name string, col_name string, session *mgo.Session, cond bson.M, data interface{}) (bool, *mgo.Collection) {
+	exists := false
+	col := session.DB(db_name).C(col_name)
+	count, _ := col.Find(cond).Count()
+	if count > 0 {
+		exists = true
+		col.Find(cond).Limit(100).Sort("-source_date_int").All(data)
 	}
 	return exists, col
 }

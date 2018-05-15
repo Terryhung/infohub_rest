@@ -11,12 +11,9 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/Terryhung/infohub_rest/infohub_user"
 	"github.com/Terryhung/infohub_rest/mongo_lib"
 	"github.com/Terryhung/infohub_rest/news"
 	"github.com/Terryhung/infohub_rest/redis_lib"
-	"github.com/Terryhung/infohub_rest/stock"
-	"github.com/Terryhung/infohub_rest/user_event"
 	"github.com/Terryhung/infohub_rest/video"
 	"github.com/ant0ine/go-json-rest/rest"
 	"github.com/go-redis/redis"
@@ -62,10 +59,8 @@ func main() {
 		rest.Get("/get_image", GetImage),
 		rest.Get("/get_all", GetAll),
 		rest.Get("/ping", Ping),
-		rest.Post("/v1/user_event", PostUserEvent),
 		rest.Get("/v1/keyword", GetNewsByKeyword),
-		rest.Get("/v1/stocks", GetStockList),
-		rest.Get("/v1/stocks_price", GetStockPrice),
+		rest.Get("/v1/foryou", GetForYou),
 
 		// BaaS
 		rest.Get("/infohub_task_handler", GetAll),
@@ -108,44 +103,6 @@ func Ping(w rest.ResponseWriter, r *rest.Request) {
 	lock.RUnlock()
 }
 
-func PostUserEvent(w rest.ResponseWriter, r *rest.Request) {
-	lock.RLock()
-
-	// Check Header and mode
-	db_name := "infohub_sandbox"
-	if r.Header.Get("mode") == "production" {
-		db_name = "infohub"
-	}
-
-	// Variable
-	msg := "Error Message"
-	Code := -1
-
-	// Dealing with Post Body
-	user_event := user_event.UserEvent{}
-	err := r.DecodeJsonPayload(&user_event)
-	if err != nil {
-		log.Print(err)
-		msg = err.Error()
-	} else {
-		// Session
-		random_index := rand.Intn(20)
-		session := sessions[random_index]
-
-		// User Event
-		_, msg = user_event.InsertOne(db_name, session)
-
-		// User
-		user := infohub_user.InfohubUser{Gaid: user_event.Gaid}
-		user.Update(db_name, session, user_event.Content_id)
-		Code = 0
-	}
-
-	// Return
-	w.WriteJson(bson.M{"Code": Code, "Result": bson.M{"Message": msg}})
-	lock.RUnlock()
-}
-
 func GetNewsByKeyword(w rest.ResponseWriter, r *rest.Request) {
 	lock.RLock()
 	needed_fields := []string{"keyword"}
@@ -166,34 +123,6 @@ func GetNewsByKeyword(w rest.ResponseWriter, r *rest.Request) {
 	}
 	var respond = Respond{0, result}
 	w.WriteJson(&respond)
-	lock.RUnlock()
-}
-
-func GetStockPrice(w rest.ResponseWriter, r *rest.Request) {
-	lock.RLock()
-	n := stock.Stock{}
-
-	// Get news
-	var results []stock.Stock
-	random_index := rand.Intn(RConNum)
-	session := sessions[random_index]
-	n.GetStockPrice(session, &results)
-
-	w.WriteJson(bson.M{"Code": 0, "Result": bson.M{"Stocks": results}})
-	lock.RUnlock()
-}
-
-func GetStockList(w rest.ResponseWriter, r *rest.Request) {
-	lock.RLock()
-	n := stock.Stock{}
-
-	// Get news
-	var results []stock.Stock
-	random_index := rand.Intn(RConNum)
-	session := sessions[random_index]
-	n.GetStockList(session, &results)
-
-	w.WriteJson(bson.M{"Code": 0, "Result": bson.M{"Stocks": results}})
 	lock.RUnlock()
 }
 
