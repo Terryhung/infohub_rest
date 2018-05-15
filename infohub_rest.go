@@ -60,7 +60,7 @@ func main() {
 		rest.Get("/get_all", GetAll),
 		rest.Get("/ping", Ping),
 		rest.Get("/v1/keyword", GetNewsByKeyword),
-		rest.Get("/v1/foryou", GetForYou),
+		rest.Get("/v1/recommend", GetForYou),
 
 		// BaaS
 		rest.Get("/infohub_task_handler", GetAll),
