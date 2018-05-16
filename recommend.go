@@ -37,6 +37,7 @@ func Recommendar(gaid string, lang string, session *mgo.Session) (bool, []news.N
 		// Random Pick
 		random_index := rand.Intn(len(c_news))
 		n := c_news[random_index]
+		n.By = "Hier"
 		news_results = append(news_results, n)
 	}
 
