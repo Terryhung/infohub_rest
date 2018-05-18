@@ -54,6 +54,7 @@ func RandomChoice(dataset []news.News, _size int) []news.News {
 		random_index := rand.Intn(len(dataset))
 		news := dataset[random_index]
 		news.Append()
+		news.By = "r"
 		results = append(results, news)
 	}
 	return results
