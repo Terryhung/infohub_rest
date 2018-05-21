@@ -8,6 +8,7 @@ import (
 	"github.com/Terryhung/infohub_rest/mongo_lib"
 	"github.com/Terryhung/infohub_rest/news"
 	"github.com/Terryhung/infohub_rest/redis_lib"
+	"github.com/Terryhung/infohub_rest/utils"
 	"github.com/go-redis/redis"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -60,6 +61,7 @@ func Recommendar(gaid string, lang string, session *mgo.Session, r_client *redis
 			random_index := rand.Intn(len(c_news))
 			n := c_news[random_index]
 			n.By = "Hier"
+			n.Id = utils.SpecialID(n.Link)
 			news_results = append(news_results, n)
 		}
 
