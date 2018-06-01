@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -18,11 +19,18 @@ type InfohubUser struct {
 	Gaid   string `json:"gaid" bson:"gaid"`
 	Cand   []int  `json:"candidates" bson:"candidates"`
 	Method string `json:"method" bson:"method"`
+	Top    []int  `json:"top" bson:"top"`
 }
 
-func Recommendar(gaid string, lang string, cty string, session *mgo.Session, r_client *redis.Client, r_status bool) (bool, []news.News) {
-	db := "analysis"
-	col := "implicit_recommendation_news"
+type Setting struct {
+	DB     string
+	C      string
+	Method string
+}
+
+func Recommendar(gaid string, lang string, cty string, session *mgo.Session, r_client *redis.Client, r_status bool, s Setting) (bool, []news.News) {
+	db := s.DB
+	col := s.C
 	user := InfohubUser{}
 	news_results := []news.News{}
 	status, _ := mongo_lib.FindOne(db, col, session, bson.M{"gaid": gaid}, &user)
@@ -38,11 +46,18 @@ func Recommendar(gaid string, lang string, cty string, session *mgo.Session, r_c
 		}
 	}
 
+	// Candidate
+	cands := user.Cand[:10]
+	fmt.Print(cands)
+	if len(cands) == 0 {
+		cands = user.Top
+	}
+
 	// Query News
 	news_db := "analysis"
 	news_col := "news_meta_baas"
 
-	for _, c := range user.Cand[:10] {
+	for _, c := range cands {
 		cond := bson.M{"hier_category": c, "language": lang}
 		var c_news []news.News
 
@@ -70,8 +85,9 @@ func Recommendar(gaid string, lang string, cty string, session *mgo.Session, r_c
 		if len(c_news) > 0 {
 			random_index := rand.Intn(len(c_news))
 			n := c_news[random_index]
-			n.By = user.Method
+			n.By = s.Method
 			n.Id = utils.SpecialID(n.Link)
+			fmt.Print(n)
 			news_results = append(news_results, n)
 		}
 
