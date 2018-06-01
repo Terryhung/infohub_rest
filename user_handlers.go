@@ -17,7 +17,8 @@ func GetForYou(w rest.ResponseWriter, r *rest.Request) {
 
 	// Get Recommend News
 	session := sessions[rand.Intn(RConNum)]
-	status, news_results := Recommendar(params["gaid"], params["language"], session, redis_client, r_status)
+
+	status, news_results := Recommendar(params["gaid"], params["language"], params["country"], session, redis_client, r_status)
 
 	// Get Images
 	image_limit, _ := strconv.Atoi(params["image_limit"])

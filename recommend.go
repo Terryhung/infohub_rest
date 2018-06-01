@@ -15,26 +15,34 @@ import (
 )
 
 type InfohubUser struct {
-	Gaid string `json:"gaid" bson:"gaid"`
-	Top  []int  `json:"top" bson:"top"`
+	Gaid   string `json:"gaid" bson:"gaid"`
+	Cand   []int  `json:"candidates" bson:"candidates"`
+	Method string `json:"method" bson:"method"`
 }
 
-func Recommendar(gaid string, lang string, session *mgo.Session, r_client *redis.Client, r_status bool) (bool, []news.News) {
-	db := "infohub_sandbox"
-	col := "user_profile"
+func Recommendar(gaid string, lang string, cty string, session *mgo.Session, r_client *redis.Client, r_status bool) (bool, []news.News) {
+	db := "analysis"
+	col := "implicit_recommendation_news"
 	user := InfohubUser{}
 	news_results := []news.News{}
-
 	status, _ := mongo_lib.FindOne(db, col, session, bson.M{"gaid": gaid}, &user)
 	if !status {
-		return false, news_results
+		// Check general user
+		g_gaids := []string{"general-user", cty}
+		g_gaid := strings.Join(g_gaids, "-")
+
+		// Try
+		status, _ = mongo_lib.FindOne(db, col, session, bson.M{"gaid": g_gaid}, &user)
+		if !status {
+			return false, news_results
+		}
 	}
 
 	// Query News
 	news_db := "analysis"
 	news_col := "news_meta_baas"
 
-	for _, c := range user.Top {
+	for _, c := range user.Cand[:10] {
 		cond := bson.M{"hier_category": c, "language": lang}
 		var c_news []news.News
 
@@ -54,13 +62,15 @@ func Recommendar(gaid string, lang string, session *mgo.Session, r_client *redis
 				mongo_lib.Find(news_db, news_col, session, cond, &c_news)
 				need_cache = true
 			}
+		} else {
+			mongo_lib.Find(news_db, news_col, session, cond, &c_news)
 		}
 
 		// Random Pick
 		if len(c_news) > 0 {
 			random_index := rand.Intn(len(c_news))
 			n := c_news[random_index]
-			n.By = "Hier"
+			n.By = user.Method
 			n.Id = utils.SpecialID(n.Link)
 			news_results = append(news_results, n)
 		}
