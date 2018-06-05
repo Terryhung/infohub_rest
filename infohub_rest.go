@@ -138,8 +138,10 @@ func GetAll(w rest.ResponseWriter, r *rest.Request) {
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.WriteJson(&r_json)
 	} else {
+		// Get Image
 		image_limit, _ := strconv.Atoi(params["image_limit"])
-		image_results := mongo_lib.GetImages(params["country"], params["language"], params["category"], sessions_taipei[random_index], image_limit, redis_client, r_status)
+		image_results := mongo_lib.GetImages(params["country"], params["language"], params["category"], sessions[random_index], image_limit, redis_client, r_status)
+
 		// Get video
 		video_limit, _ := strconv.Atoi(params["video_limit"])
 		video_results := []video.Video{}

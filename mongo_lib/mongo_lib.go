@@ -139,7 +139,7 @@ func GetImages(country string, language string, category string, session *mgo.Se
 		}
 	}
 
-	col := session.DB("droi").C("image_cache")
+	col := session.DB("analysis").C("image_cache")
 	constr := bson.M{"upserted_datetime": bson.M{"$gte": utils.NowTSNorm()*1000 - 86400000}, "category": category, "language": language, "country_array": country, "_from": bson.M{"$regex": "images/.*"}}
 	_ = col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
 	if len(results) == 0 {

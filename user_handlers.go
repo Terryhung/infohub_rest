@@ -37,7 +37,7 @@ func GetForYou(w rest.ResponseWriter, r *rest.Request) {
 
 	// Get Images
 	image_limit, _ := strconv.Atoi(params["image_limit"])
-	image_results := mongo_lib.GetImages(params["country"], params["language"], params["category"], sessions_taipei[rand.Intn(RConNum)], image_limit, redis_client, r_status)
+	image_results := mongo_lib.GetImages(params["country"], params["language"], params["category"], session, image_limit, redis_client, r_status)
 
 	if !status || len(news_results) < 4 {
 		GetAll(w, r)
