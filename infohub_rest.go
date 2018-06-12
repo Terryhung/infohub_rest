@@ -132,9 +132,7 @@ func GetAll(w rest.ResponseWriter, r *rest.Request) {
 	status, params := CheckParameters(r, needed_fields)
 	random_index := rand.Intn(RConNum)
 	if !status {
-		var r_json map[string]string
-		r_json = make(map[string]string)
-		r_json["Status"] = "Error"
+		r_json := Respond{-1, Result{"Parameters missing!", nil, nil, nil}}
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.WriteJson(&r_json)
 	} else {
