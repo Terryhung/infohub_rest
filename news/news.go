@@ -25,7 +25,7 @@ type News struct {
 	Id                string   `json:"_Id"`
 	Category          []string `json:"category"`
 	By                string   `json:"by"`
-	Comment_count     string   `json:"comment_count"`
+	Comment_count     int      `json:"comment_count"`
 }
 
 func (n *News) Append() {
