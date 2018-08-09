@@ -46,9 +46,11 @@ func Recommendar(gaid string, lang string, cty string, session *mgo.Session, r_c
 		}
 	}
 
+	cands := user.Cand
 	// Candidate
-	cands := user.Cand[:10]
-	fmt.Print(cands)
+	if len(user.Cand) > 10 {
+		cands = user.Cand[:10]
+	}
 	if len(cands) == 0 {
 		cands = user.Top
 	}
