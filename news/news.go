@@ -26,6 +26,7 @@ type News struct {
 	Category          []string `json:"category"`
 	By                string   `json:"by"`
 	Comment_count     int      `json:"comment_count"`
+	From              string   `json:"_from" bson:"_from"`
 }
 
 func (n *News) Append() {
