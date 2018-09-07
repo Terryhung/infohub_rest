@@ -197,11 +197,25 @@ func GetVideos(country string, language string, category string, session *mgo.Se
 	return results
 }
 
+func GenCondition(cat string, lang string, cty string, cty_ary bson.M, source_date int32) bson.M {
+	cond := bson.M{"source_date_int": bson.M{"$gte": source_date}, "category": cat, "language": lang}
+
+	// Check using country or country_array
+	if cty != "" {
+		cond["country"] = cty
+	} else if len(cty_ary) > 0 {
+		cond["country_array"] = cty_ary
+	}
+
+	return cond
+}
+
 func GetNews(country string, language string, category string, session *mgo.Session, _size int, r_client *redis.Client, r_status bool) []news.News {
 	var results []news.News
 	keys := []string{country, language, category}
 	key := strings.Join(keys, "-")
 
+	// Check key exist in Redis or not
 	if r_status {
 		redis_lib.CheckExists(r_client, key, &results)
 		if len(results) > 0 {
@@ -210,23 +224,38 @@ func GetNews(country string, language string, category string, session *mgo.Sess
 		}
 	}
 
+	// Check category is for you or not
 	if strings.Contains(category, "for") && strings.Contains(category, "you") {
 		return GetForyou(country, language, category, session, _size, r_client, r_status)
 	}
 
+	// Set up variable
 	col := session.DB("analysis").C("news_meta_baas")
-	constr := bson.M{"source_date_int": bson.M{"$gte": utils.NowTSNorm() - 86400}, "category": category, "language": language, "country": country}
-	_ = col.Find(constr).Limit(200).Sort("-source_date_int").All(&results)
+	offset := 1
+	if category == "girls" || category == "18plus" {
+		col = session.DB("analysis").C("news_meta")
+		offset = 6
+	}
+	date_cond := utils.NowTSNorm() - 86400*int32(offset)
+	date_cond_long := date_cond - 86400*2
+
+	// Find today news
+	constr := GenCondition(category, language, country, bson.M{}, date_cond)
+	_ = col.Find(constr).Sort("-source_date_int").Limit(200).All(&results)
+
+	// Find last 3 day news
 	if len(results) == 0 {
-		constr := bson.M{"source_date_int": bson.M{"$gte": utils.NowTSNorm() - 86400*3}, "category": category, "language": language, "country_array": bson.M{"$in": []string{"ALL", country}}}
+		constr := GenCondition(category, language, "", bson.M{"$in": []string{"ALL", country}}, date_cond_long)
 		_ = col.Find(constr).Limit(200).Sort("-source_date_int").All(&results)
 	}
 
+	// Find English news
 	if len(results) == 0 && language != "ar" && language != "in" {
-		constr := bson.M{"source_date_int": bson.M{"$gte": utils.NowTSNorm() - 86400*3}, "category": category, "language": "en", "country_array": bson.M{"$in": []string{"ALL", country}}}
+		constr := GenCondition(category, "en", "", bson.M{"$in": []string{"ALL", country}}, date_cond_long)
 		_ = col.Find(constr).Limit(200).Sort("-source_date_int").All(&results)
 	}
 
+	// Save into Redis as cache
 	if len(results) > 0 {
 		redis_lib.SetValue(r_client, key, results, 3600)
 	} else {
@@ -235,7 +264,6 @@ func GetNews(country string, language string, category string, session *mgo.Sess
 
 	if len(results) > 0 {
 		results = RandomChoice(results, _size)
-		// RandomChoiceGeneral(&results, _size)
 	}
 
 	return results
