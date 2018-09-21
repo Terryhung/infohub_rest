@@ -244,9 +244,11 @@ func GetNews(country string, language string, category string, session *mgo.Sess
 	_ = col.Find(constr).Sort("-source_date_int").Limit(200).All(&results)
 
 	// Find last 3 day news
-	if len(results) == 0 {
+	if len(results) < 100 {
+		more_news := []news.News{}
 		constr := GenCondition(category, language, "", bson.M{"$in": []string{"ALL", country}}, date_cond_long)
-		_ = col.Find(constr).Limit(200).Sort("-source_date_int").All(&results)
+		_ = col.Find(constr).Limit(200 - len(results)).Sort("-source_date_int").All(&more_news)
+		results = append(results, more_news...)
 	}
 
 	// Find English news
