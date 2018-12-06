@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -60,7 +59,7 @@ func Recommendar(gaid string, lang string, cty string, session *mgo.Session, r_c
 	news_col := "news_meta_baas"
 
 	for _, c := range cands {
-		cond := bson.M{"hier_category": c, "language": lang}
+		cond := bson.M{"hier_category": c, "language": lang, "category": bson.M{"$ne": "girls"}}
 		var c_news []news.News
 
 		// Concate Key for cache
@@ -89,7 +88,6 @@ func Recommendar(gaid string, lang string, cty string, session *mgo.Session, r_c
 			n := c_news[random_index]
 			n.By = s.Method
 			n.Id = utils.SpecialID(n.Link)
-			fmt.Print(n)
 			news_results = append(news_results, n)
 		}
 
