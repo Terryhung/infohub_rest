@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/Terryhung/infohub_rest/gifimage"
 	"github.com/Terryhung/infohub_rest/mongo_lib"
 	"github.com/Terryhung/infohub_rest/news"
 	"github.com/Terryhung/infohub_rest/redis_lib"
@@ -90,7 +91,7 @@ func CheckParameters(r *rest.Request, needed_fields []string) (bool, map[string]
 }
 
 // DB Connection
-var RConNum = 5
+var RConNum = 15
 var sessions = createConnections(RConNum, "i7")
 var sessions_taipei = createConnections(RConNum, "taipei_server")
 var redis_client, r_status = redis_lib.NewClient()
@@ -131,23 +132,42 @@ func GetAll(w rest.ResponseWriter, r *rest.Request) {
 	needed_fields := []string{"country", "language", "category", "news_limit", "video_limit", "image_limit"}
 	status, params := CheckParameters(r, needed_fields)
 	random_index := rand.Intn(RConNum)
+	var wg sync.WaitGroup
+
 	if !status {
 		r_json := Respond{-1, Result{"Parameters missing!", nil, nil, nil}}
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.WriteJson(&r_json)
 	} else {
+		wg.Add(3)
+		// Claim Variable
+		image_results := []gifimage.GifImage{}
+		video_results := []video.Video{}
+		news_results := []news.News{}
 		// Get Image
-		image_limit, _ := strconv.Atoi(params["image_limit"])
-		image_results := mongo_lib.GetImages(params["country"], params["language"], params["category"], sessions[random_index], image_limit, redis_client, r_status)
+
+		go func() {
+			image_limit, _ := strconv.Atoi(params["image_limit"])
+			image_results = mongo_lib.GetImages(params["country"], params["language"], params["category"], sessions[random_index], image_limit, redis_client, r_status)
+			wg.Done()
+		}()
 
 		// Get video
-		video_limit, _ := strconv.Atoi(params["video_limit"])
-		video_results := []video.Video{}
-		if video_limit > 0 {
-			video_results = mongo_lib.GetVideos(params["country"], params["language"], params["category"], sessions_taipei[random_index], video_limit, redis_client, r_status)
-		}
-		news_limit, _ := strconv.Atoi(params["news_limit"])
-		news_results := mongo_lib.GetNews(params["country"], params["language"], params["category"], sessions[random_index], news_limit, redis_clients[random_index], r_status)
+		go func() {
+			video_limit, _ := strconv.Atoi(params["video_limit"])
+			if video_limit > 0 {
+				video_results = mongo_lib.GetVideos(params["country"], params["language"], params["category"], sessions_taipei[random_index], video_limit, redis_client, r_status)
+			}
+			wg.Done()
+		}()
+
+		go func() {
+			news_limit, _ := strconv.Atoi(params["news_limit"])
+			news_results = mongo_lib.GetNews(params["country"], params["language"], params["category"], sessions[random_index], news_limit, redis_clients[random_index], r_status)
+			wg.Done()
+		}()
+
+		wg.Wait()
 
 		var result = Result{"No Data", nil, nil, nil}
 		result = Result{"OK", news_results, video_results, image_results}

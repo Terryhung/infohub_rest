@@ -124,14 +124,22 @@ func GetForyou(country string, language string, category string, session *mgo.Se
 	return results
 }
 
+func GenRedisKey(keys []string) string {
+	return strings.Join(keys, "-")
+}
+
 func GetImages(country string, language string, category string, session *mgo.Session, _size int, r_client *redis.Client, r_status bool) []gifimage.GifImage {
 	var results []gifimage.GifImage
+
+	// Check category
 	if strings.Contains(category, "for") && strings.Contains(category, "you") {
 		category = "headline"
 	}
 
-	keys := []string{country, language, category, "image"}
-	key := strings.Join(keys, "-")
+	// Generate Redis Key
+	key := GenRedisKey([]string{country, language, category, "image"})
+
+	// Get Cache Data
 	if r_status {
 		redis_lib.CheckExists(r_client, key, &results)
 		if len(results) > 0 {
@@ -140,24 +148,27 @@ func GetImages(country string, language string, category string, session *mgo.Se
 		}
 	}
 
-	col := session.DB("analysis").C("image_cache")
+	// Query Condition
 	constr := bson.M{"upserted_datetime": bson.M{"$gte": utils.NowTSNorm()*1000 - 86400000}, "category": category, "language": language}
-	_ = col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
-	if len(results) == 0 {
-		constr := bson.M{"upserted_datetime": bson.M{"$gte": utils.NowTSNorm()*1000 - 86400000}, "category": category, "language": language, "country_array": "ALL"}
-		_ = col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
-	}
 
+	// Query
+	col := session.DB("analysis").C("image_cache")
+	col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
+
+	// Check size of result: if no results
+	// Use other condition
 	if len(results) == 0 && language != "ar" && language != "in" {
-		constr := bson.M{"upserted_datetime": bson.M{"$gte": utils.NowTSNorm()*1000 - 86400000}, "category": category, "language": "en", "country_array": "ALL"}
+		constr["language"] = "en"
 		_ = col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
 	}
 
+	// Set Cache
 	redis_lib.SetValue(r_client, key, results, 600)
 
 	if len(results) > 0 {
 		results = RandomChoiceImage(results, _size)
 	}
+
 	return results
 }
 
