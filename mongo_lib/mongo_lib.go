@@ -2,6 +2,7 @@ package mongo_lib
 
 import (
 	"crypto/sha1"
+	"fmt"
 	"math/rand"
 	"strings"
 
@@ -140,15 +141,15 @@ func GetImages(country string, language string, category string, session *mgo.Se
 	}
 
 	col := session.DB("analysis").C("image_cache")
-	constr := bson.M{"upserted_datetime": bson.M{"$gte": utils.NowTSNorm()*1000 - 86400000}, "category": category, "language": language, "country_array": country, "_from": bson.M{"$regex": "images/.*"}}
+	constr := bson.M{"upserted_datetime": bson.M{"$gte": utils.NowTSNorm()*1000 - 86400000}, "category": category, "language": language}
 	_ = col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
 	if len(results) == 0 {
-		constr := bson.M{"upserted_datetime": bson.M{"$gte": utils.NowTSNorm()*1000 - 86400000}, "category": category, "language": language, "country_array": "ALL", "_from": bson.M{"$regex": "images/.*"}}
+		constr := bson.M{"upserted_datetime": bson.M{"$gte": utils.NowTSNorm()*1000 - 86400000}, "category": category, "language": language, "country_array": "ALL"}
 		_ = col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
 	}
 
 	if len(results) == 0 && language != "ar" && language != "in" {
-		constr := bson.M{"upserted_datetime": bson.M{"$gte": utils.NowTSNorm()*1000 - 86400000}, "category": category, "language": "en", "country_array": "ALL", "_from": bson.M{"$regex": "images/.*"}}
+		constr := bson.M{"upserted_datetime": bson.M{"$gte": utils.NowTSNorm()*1000 - 86400000}, "category": category, "language": "en", "country_array": "ALL"}
 		_ = col.Find(constr).Limit(200).Sort("-upserted_datetime").All(&results)
 	}
 
@@ -215,6 +216,7 @@ func GetNews(country string, language string, category string, session *mgo.Sess
 	keys := []string{country, language, category}
 	key := strings.Join(keys, "-")
 
+	fmt.Print(keys)
 	// Check key exist in Redis or not
 	if r_status {
 		redis_lib.CheckExists(r_client, key, &results)

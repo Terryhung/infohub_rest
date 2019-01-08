@@ -90,7 +90,7 @@ func CheckParameters(r *rest.Request, needed_fields []string) (bool, map[string]
 }
 
 // DB Connection
-var RConNum = 50
+var RConNum = 5
 var sessions = createConnections(RConNum, "i7")
 var sessions_taipei = createConnections(RConNum, "taipei_server")
 var redis_client, r_status = redis_lib.NewClient()
