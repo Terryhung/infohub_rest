@@ -13,6 +13,13 @@ import (
 var DB = "analysis"
 var IMG_COL = "image_cache"
 
+// Special Category
+var Special_Category = map[string]bool{
+	"girls": true,
+	"pets":  true,
+	"funny": true,
+}
+
 func NewsQuery(country string, language string, category string, session *mgo.Session) []news.News {
 	// Query News by (country, language, category)
 	var news_result []news.News

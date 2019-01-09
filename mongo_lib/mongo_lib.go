@@ -33,13 +33,6 @@ type Account struct {
 	Mongo_users []User
 }
 
-// Special Category
-var Special_Category = map[string]bool{
-	"girls": true,
-	"pet":   true,
-	"funny": true,
-}
-
 func RandomChoiceGeneral(dataset interface{}, _size int) {
 	switch t := dataset.(type) {
 	case *[]news.News:
