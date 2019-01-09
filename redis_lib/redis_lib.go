@@ -35,10 +35,7 @@ func CheckExists(client *redis.Client, key string, result interface{}) {
 	case *[]video.Video, *[]news.News, *[]gifimage.GifImage:
 		if err == nil {
 			json.Unmarshal(val, &t)
-		} else {
-			fmt.Print(err)
 		}
-
 	}
 }
 

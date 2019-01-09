@@ -2,7 +2,6 @@ package mongo_lib
 
 import (
 	"crypto/sha1"
-	"fmt"
 	"math/rand"
 	"strings"
 
@@ -32,6 +31,13 @@ type User struct {
 
 type Account struct {
 	Mongo_users []User
+}
+
+// Special Category
+var Special_Category = map[string]bool{
+	"girls": true,
+	"pet":   true,
+	"funny": true,
 }
 
 func RandomChoiceGeneral(dataset interface{}, _size int) {
@@ -124,10 +130,6 @@ func GetForyou(country string, language string, category string, session *mgo.Se
 	return results
 }
 
-func GenRedisKey(keys []string) string {
-	return strings.Join(keys, "-")
-}
-
 func GetImages(country string, language string, category string, session *mgo.Session, _size int, r_client *redis.Client, r_status bool) []gifimage.GifImage {
 	var results []gifimage.GifImage
 
@@ -209,25 +211,11 @@ func GetVideos(country string, language string, category string, session *mgo.Se
 	return results
 }
 
-func GenCondition(cat string, lang string, cty string, cty_ary bson.M, source_date int32) bson.M {
-	cond := bson.M{"source_date_int": bson.M{"$gte": source_date}, "category": cat, "language": lang}
-
-	// Check using country or country_array
-	if cty != "" {
-		cond["country"] = cty
-	} else if len(cty_ary) > 0 {
-		cond["country_array"] = cty_ary
-	}
-
-	return cond
-}
-
 func GetNews(country string, language string, category string, session *mgo.Session, _size int, r_client *redis.Client, r_status bool) []news.News {
 	var results []news.News
 	keys := []string{country, language, category}
 	key := strings.Join(keys, "-")
 
-	fmt.Print(keys)
 	// Check key exist in Redis or not
 	if r_status {
 		redis_lib.CheckExists(r_client, key, &results)

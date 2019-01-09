@@ -46,7 +46,7 @@ type Result struct {
 
 type Respond struct {
 	Code   int
-	Result Result
+	Result interface{}
 }
 
 // Routing
@@ -59,6 +59,7 @@ func main() {
 		rest.Get("/get_video", GetVideo),
 		rest.Get("/get_image", GetImage),
 		rest.Get("/get_all", GetAll),
+		rest.Get("/cache_warmup", CacheWarmup),
 		rest.Get("/ping", Ping),
 		rest.Get("/v1/keyword", GetNewsByKeyword),
 		rest.Get("/v1/recommend", GetForYou),
@@ -91,7 +92,7 @@ func CheckParameters(r *rest.Request, needed_fields []string) (bool, map[string]
 }
 
 // DB Connection
-var RConNum = 15
+var RConNum = 5
 var sessions = createConnections(RConNum, "i7")
 var sessions_taipei = createConnections(RConNum, "taipei_server")
 var redis_client, r_status = redis_lib.NewClient()
@@ -176,6 +177,25 @@ func GetAll(w rest.ResponseWriter, r *rest.Request) {
 
 		w.WriteJson(&respond)
 	}
+	lock.RUnlock()
+}
+
+func CacheWarmup(w rest.ResponseWriter, r *rest.Request) {
+	lock.RLock()
+	status := false
+
+	random_index := rand.Intn(RConNum)
+
+	if !r_status {
+	} else {
+		needed_fields := []string{"country", "language", "category"}
+		valid, params := CheckParameters(r, needed_fields)
+		if valid {
+			status = mongo_lib.Warmup(params["country"], params["language"], params["category"], sessions[random_index], redis_client)
+		}
+	}
+	respond := Respond{0, status}
+	w.WriteJson(&respond)
 	lock.RUnlock()
 }
 
