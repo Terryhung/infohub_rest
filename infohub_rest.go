@@ -15,6 +15,7 @@ import (
 	"github.com/Terryhung/infohub_rest/mongo_lib"
 	"github.com/Terryhung/infohub_rest/news"
 	"github.com/Terryhung/infohub_rest/redis_lib"
+	"github.com/Terryhung/infohub_rest/utils"
 	"github.com/Terryhung/infohub_rest/video"
 	"github.com/ant0ine/go-json-rest/rest"
 	"github.com/go-redis/redis"
@@ -48,6 +49,8 @@ type Respond struct {
 	Code   int
 	Result interface{}
 }
+
+var updateNews = news.News{Title: "New experience for Infohub", Source_name: "InfoHub", Image_url_array: []string{"https://storage.googleapis.com/infohub-img/callForUpdate.png"}, Image_url: "https://storage.googleapis.com/infohub-img/callForUpdate.png", Like_numbers: 32767, Description: "Faster and simpler, try new interfaces! Update now!", Link: "https://play.google.com/store/apps/details?id=com.infohub.monster&hl=zh_TW", Source_date_int: utils.NowTS()}
 
 // Routing
 func main() {
@@ -165,6 +168,7 @@ func GetAll(w rest.ResponseWriter, r *rest.Request) {
 		go func() {
 			news_limit, _ := strconv.Atoi(params["news_limit"])
 			news_results = mongo_lib.GetNews(params["country"], params["language"], params["category"], sessions[random_index], news_limit, redis_clients[random_index], r_status)
+			news_results = append(news_results, updateNews)
 			wg.Done()
 		}()
 
@@ -270,6 +274,7 @@ func GetNews(w rest.ResponseWriter, r *rest.Request) {
 		w.WriteJson(&r_json)
 	} else {
 		results := mongo_lib.GetNews(params["country"], params["language"], params["category"], sessions[random_index], 10, redis_client, r_status)
+		results = append(results, updateNews)
 		var result = Result{"No News", nil, nil, nil}
 
 		if len(results) > 0 {
