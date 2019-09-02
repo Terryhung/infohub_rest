@@ -1,4 +1,4 @@
-FROM golang:1.8
+FROM golang:1.10
 
 WORKDIR $GOPATH/src/github.com/Terryhung/infohub_rest
 COPY . .
