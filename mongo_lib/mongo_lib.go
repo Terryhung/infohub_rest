@@ -262,7 +262,7 @@ func GetNews(country string, language string, category string, session *mgo.Sess
 		results = RandomChoice(results, _size)
 	}
 
-	half_size := _size / 2
+	half_size := (_size * 2) / 3
 
 	t_news := QueryTBLNews(country, language, "News", half_size)
 	for i := 0; i < len(results); i++ {

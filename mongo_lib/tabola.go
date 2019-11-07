@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/Terryhung/infohub_rest/news"
 )
@@ -45,8 +47,35 @@ func (m *TBL) toNews() (news news.News) {
 	return
 }
 
+var TBCategories = []string{
+	"Sports",
+	"Entertainment",
+	"Finance",
+	"Lifestyle",
+	"Music",
+	"Celebrities",
+	"Technology",
+	"Movies",
+	"Health",
+	"Fashion",
+	"Environment",
+	"Beauty",
+	"Tourism",
+	"Culture",
+	"Trends",
+	"Science",
+	"Food",
+	"News",
+}
+
+func GetRandomTBCategory() (category string) {
+	rand.Seed(time.Now().UnixNano())
+	category = TBCategories[rand.Intn(len(TBCategories))]
+	return
+}
+
 func QueryTBLNews(cty, lang, gaid string, limit int) (news []news.News) {
-	url := fmt.Sprintf("%s&countryCode=%s&language=%s&limit=%d&userId=%s", TBLURL, cty, lang, limit, gaid)
+	url := fmt.Sprintf("%s&countryCode=%s&language=%s&limit=%d&userId=%s&category=%s", TBLURL, cty, lang, limit, gaid, GetRandomTBCategory())
 	resp, err := http.Get(url)
 
 	if err != nil {
