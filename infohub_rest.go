@@ -151,17 +151,11 @@ func GetAll(w rest.ResponseWriter, r *rest.Request) {
 		// Get Image
 
 		go func() {
-			image_limit, _ := strconv.Atoi(params["image_limit"])
-			image_results = mongo_lib.GetImages(params["country"], params["language"], params["category"], sessions[random_index], image_limit, redis_client, r_status)
 			wg.Done()
 		}()
 
 		// Get video
 		go func() {
-			video_limit, _ := strconv.Atoi(params["video_limit"])
-			if video_limit > 0 {
-				video_results = mongo_lib.GetVideos(params["country"], params["language"], params["category"], sessions_taipei[random_index], video_limit, redis_client, r_status)
-			}
 			wg.Done()
 		}()
 
